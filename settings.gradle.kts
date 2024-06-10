@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Gesture Test App"
 include(":app")
+include(":gesture_server")
