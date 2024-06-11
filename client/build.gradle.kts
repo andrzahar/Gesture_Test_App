@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -37,7 +38,15 @@ android {
 
 dependencies {
 
+    implementation(project(":api"))
+
     implementation(libs.androidx.core.ktx)
+
+    implementation(libs.client.core)
+    implementation(libs.client.android)
+    implementation(libs.client.websockets)
+    implementation(libs.json.serialization)
+    implementation(libs.ktor.serialization)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
