@@ -45,7 +45,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     implementation(libs.client.core)
-    implementation(libs.client.android)
+    implementation(libs.client.okhttp)
     implementation(libs.client.websockets)
     implementation(libs.json.serialization)
     implementation(libs.ktor.serialization)
