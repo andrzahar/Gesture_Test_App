@@ -1,4 +1,4 @@
-package com.andr.zahar2.api
+package com.andr.zahar2.api.model
 
 import kotlinx.serialization.Serializable
 
