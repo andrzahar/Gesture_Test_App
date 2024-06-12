@@ -2,9 +2,13 @@ package com.andr.zahar2.gesture_server.server
 
 import com.andr.zahar2.api.model.ClientEvent
 import com.andr.zahar2.api.model.GestureEvent
-import com.andr.zahar2.api.model.Point
 import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.sendSerialized
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import java.util.Collections
 
 class ClientsConnectionsManager {
@@ -12,18 +16,23 @@ class ClientsConnectionsManager {
     private val connections =
         Collections.synchronizedSet<DefaultWebSocketServerSession>(LinkedHashSet())
 
+    private val _clientEventFlow = MutableSharedFlow<ClientEvent>()
+    val clientEventFlow = _clientEventFlow.asSharedFlow()
+
     fun addConnection(session: DefaultWebSocketServerSession) {
         connections += session
     }
 
-    suspend fun broadcast(gestureEvent: GestureEvent) {
+    fun broadcast(gestureEvent: GestureEvent) {
         connections.forEach {
-            it.sendSerialized(gestureEvent)
+            CoroutineScope(Dispatchers.IO).launch {
+                it.sendSerialized(gestureEvent)
+            }
         }
     }
 
-    suspend fun onClientEvent(clientEvent: ClientEvent) {
-        broadcast(GestureEvent(Point(0f, 0f), Point(1f, 1f), 3L))
+    suspend fun onClientEvent(session: DefaultWebSocketServerSession, clientEvent: ClientEvent) {
+        _clientEventFlow.emit(clientEvent)
     }
 
     fun removingConnection(session: DefaultWebSocketServerSession) {
