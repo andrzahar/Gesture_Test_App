@@ -12,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.andr.zahar2.gesturetestapp.ui.ui.theme.GestureTestAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,24 +22,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             GestureTestAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
+                    ContentView(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(modifier: Modifier = Modifier) {
-    
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    GestureTestAppTheme {
-        Greeting()
     }
 }
