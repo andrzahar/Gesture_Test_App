@@ -7,15 +7,18 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 class Network(private val client: HttpClient) {
 
     private var socketSession: DefaultClientWebSocketSession? = null
 
-    fun gestureListener(): Flow<GestureEvent> = flow {
-        client.webSocket(host = "", port = 1106, path = "/gestures") {
+    val gestureListener: Flow<GestureEvent> = flow {
+        client.webSocket(host = "192.168.101.15", port = 1106, path = "/gestures") {
             socketSession = this
             try {
                 while (true) {
@@ -28,9 +31,14 @@ class Network(private val client: HttpClient) {
                 socketSession = null
             }
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
-    fun sendEvent(event: ClientEvent): Flow<Any> = flow {
+    fun sendEvent(event: ClientEvent): Flow<Nothing> = flow<Nothing> {
         socketSession?.sendSerialized(event)
+    }.flowOn(Dispatchers.IO)
+
+    fun stop() {
+        socketSession?.cancel()
+        socketSession = null
     }
 }
