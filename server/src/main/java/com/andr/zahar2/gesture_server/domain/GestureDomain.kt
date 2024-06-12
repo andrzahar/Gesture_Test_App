@@ -31,6 +31,10 @@ class GestureDomain(
         serverManager.startServer()
     }
 
+    fun onGestureEvent(gestureEvent: GestureEvent) {
+        clientsConnectionsManager.broadcast(gestureEvent)
+    }
+
     fun stop() {
         serverManager.stopServer()
     }
