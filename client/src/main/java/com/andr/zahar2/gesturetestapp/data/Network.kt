@@ -7,46 +7,74 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 
 class Network(private val client: HttpClient) {
 
     private var socketSession: DefaultClientWebSocketSession? = null
 
-    private val _isRunning = MutableStateFlow(false)
-    val isRunning = _isRunning.asStateFlow()
+    private var webSocketJob: Job? = null
 
-    suspend fun start() {
+    fun start(gesturesFlow: MutableSharedFlow<GestureEvent>, eventOnStart: ClientEvent) {
+        webSocketJob = CoroutineScope(Dispatchers.IO).launch {
+            supervisorScope {
+                while (isActive) {
+                    try {
+                        connectAndReceiveMessages(gesturesFlow, eventOnStart)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        delay(5000)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun connectAndReceiveMessages(
+        gesturesFlow: MutableSharedFlow<GestureEvent>,
+        eventOnStart: ClientEvent
+    ) {
         client.webSocket(host = "192.168.101.15", port = 1106, path = "/gestures") {
             socketSession = this
-            _isRunning.emit(true)
-        }
-    }
-
-    val gesturesFlow: Flow<GestureEvent> = flow {
-        try {
-            while (isRunning.value) {
-                val gesture = socketSession?.receiveDeserialized<GestureEvent>()
-                gesture?.let { emit(it) }
+            sendEvent(eventOnStart)
+            try {
+                receiveMessages(gesturesFlow)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                stop()
             }
-        } catch (_: Exception) {
-
-        } finally {
-            stop()
         }
     }
 
-    suspend fun sendEvent(event: ClientEvent) {
-        socketSession?.sendSerialized(event)
+    private suspend fun DefaultClientWebSocketSession.receiveMessages(
+        gesturesFlow: MutableSharedFlow<GestureEvent>
+    ) {
+        while (isActive) {
+            val gesture = receiveDeserialized<GestureEvent>()
+            gesturesFlow.emit(gesture)
+        }
     }
 
-    suspend fun stop() {
-        _isRunning.emit(false)
+    fun sendEvent(event: ClientEvent) {
+        CoroutineScope(Dispatchers.IO).launch {
+            socketSession?.sendSerialized(event)
+        }
+    }
+
+    fun stop() {
         socketSession?.cancel()
         socketSession = null
+
+        webSocketJob?.cancel()
+        webSocketJob = null
     }
 }
