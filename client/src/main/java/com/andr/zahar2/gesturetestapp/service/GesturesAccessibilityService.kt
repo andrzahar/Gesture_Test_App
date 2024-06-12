@@ -5,6 +5,7 @@ import android.accessibilityservice.GestureDescription
 import android.graphics.Path
 import android.view.accessibility.AccessibilityEvent
 import com.andr.zahar2.api.model.GestureEvent
+import com.andr.zahar2.gesturetestapp.R
 import com.andr.zahar2.gesturetestapp.domain.GesturesDomain
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +36,7 @@ class GesturesAccessibilityService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
-        if (event?.source?.packageName == "com.android.chrome") {
+        if (event?.source?.packageName == getString(R.string.chrome_package)) {
             if (!chromeOpenCheck) {
                 chromeOpenCheck = true
                 onChromeIsOpen()
