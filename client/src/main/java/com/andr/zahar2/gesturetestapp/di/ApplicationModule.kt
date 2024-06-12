@@ -1,6 +1,7 @@
 package com.andr.zahar2.gesturetestapp.di
 
 import com.andr.zahar2.gesturetestapp.data.Network
+import com.andr.zahar2.gesturetestapp.domain.GesturesDomain
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,4 +28,8 @@ object ApplicationModule {
     @Provides
     @Singleton
     fun provideNetwork(client: HttpClient): Network = Network(client)
+
+    @Provides
+    @Singleton
+    fun provideGesturesDomain(network: Network): GesturesDomain = GesturesDomain(network)
 }
