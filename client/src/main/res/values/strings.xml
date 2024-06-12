@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">Gesture Test App</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="chrome_package" translatable="false">com.android.chrome</string>
+    <string name="app_name">Gesture Client</string>
+    <string name="start_pause_button_start">Начать</string>
+    <string name="start_pause_button_pause">Пауза</string>
+    <string name="config_button">Config</string>
+    <string name="save_button">Сохранить</string>
+    <string name="ip_field">IP</string>
+    <string name="port_field">Порт</string>
 </resources>
