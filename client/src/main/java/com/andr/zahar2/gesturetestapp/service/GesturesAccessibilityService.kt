@@ -53,6 +53,7 @@ class GesturesAccessibilityService : AccessibilityService() {
     }
 
     private fun makeGesture(gestureEvent: GestureEvent) {
+        if (!domain.isActiveFlow.value) return
         dispatchGesture(
             buildSwipe(gestureEvent),
             object : GestureResultCallback() {
