@@ -7,13 +7,11 @@ import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 
 class Network(private val client: HttpClient) {
 
@@ -22,29 +20,32 @@ class Network(private val client: HttpClient) {
     private val _isRunning = MutableStateFlow(false)
     val isRunning = _isRunning.asStateFlow()
 
-    val gestureListener: Flow<GestureEvent> = flow {
+    suspend fun start() {
         client.webSocket(host = "192.168.101.15", port = 1106, path = "/gestures") {
             socketSession = this
-            _isRunning.tryEmit(true)
-            try {
-                while (true) {
-                    val gesture = receiveDeserialized<GestureEvent>()
-                    emit(gesture)
-                }
-            } catch (_: Exception) {
-
-            } finally {
-                stop()
-            }
+            _isRunning.emit(true)
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
-    fun sendEvent(event: ClientEvent): Flow<Nothing> = flow<Nothing> {
+    val gesturesFlow: Flow<GestureEvent> = flow {
+        try {
+            while (isRunning.value) {
+                val gesture = socketSession?.receiveDeserialized<GestureEvent>()
+                gesture?.let { emit(it) }
+            }
+        } catch (_: Exception) {
+
+        } finally {
+            stop()
+        }
+    }
+
+    suspend fun sendEvent(event: ClientEvent) {
         socketSession?.sendSerialized(event)
-    }.flowOn(Dispatchers.IO)
+    }
 
-    fun stop() {
-        _isRunning.tryEmit(false)
+    suspend fun stop() {
+        _isRunning.emit(false)
         socketSession?.cancel()
         socketSession = null
     }
