@@ -10,6 +10,8 @@ import io.ktor.client.plugins.websocket.webSocket
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -17,18 +19,22 @@ class Network(private val client: HttpClient) {
 
     private var socketSession: DefaultClientWebSocketSession? = null
 
+    private val _isRunning = MutableStateFlow(false)
+    val isRunning = _isRunning.asStateFlow()
+
     val gestureListener: Flow<GestureEvent> = flow {
         client.webSocket(host = "192.168.101.15", port = 1106, path = "/gestures") {
             socketSession = this
+            _isRunning.tryEmit(true)
             try {
                 while (true) {
                     val gesture = receiveDeserialized<GestureEvent>()
                     emit(gesture)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
 
             } finally {
-                socketSession = null
+                stop()
             }
         }
     }.flowOn(Dispatchers.IO)
@@ -38,6 +44,7 @@ class Network(private val client: HttpClient) {
     }.flowOn(Dispatchers.IO)
 
     fun stop() {
+        _isRunning.tryEmit(false)
         socketSession?.cancel()
         socketSession = null
     }
