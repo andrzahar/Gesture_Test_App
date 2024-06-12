@@ -1,7 +1,11 @@
 package com.andr.zahar2.gesturetestapp.data
 
+import android.content.Context
 import com.andr.zahar2.api.model.ClientEvent
+import com.andr.zahar2.api.model.Constants
 import com.andr.zahar2.api.model.GestureEvent
+import com.andr.zahar2.gesturetestapp.preferences.Preferences.ipFlow
+import com.andr.zahar2.gesturetestapp.preferences.Preferences.portFlow
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.receiveDeserialized
@@ -13,11 +17,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
-class Network(private val client: HttpClient) {
+class Network(private val context: Context, private val client: HttpClient) {
 
     private var socketSession: DefaultClientWebSocketSession? = null
 
@@ -42,7 +47,9 @@ class Network(private val client: HttpClient) {
         gesturesFlow: MutableSharedFlow<GestureEvent>,
         eventOnStart: ClientEvent
     ) {
-        client.webSocket(host = "192.168.101.15", port = 1106, path = "/gestures") {
+        val host = context.ipFlow.first()
+        val port = context.portFlow.first()
+        client.webSocket(host = host, port = port, path = Constants.PATH) {
             socketSession = this
             sendEvent(eventOnStart)
             try {

@@ -1,10 +1,12 @@
 package com.andr.zahar2.gesturetestapp.di
 
+import android.content.Context
 import com.andr.zahar2.gesturetestapp.data.Network
 import com.andr.zahar2.gesturetestapp.domain.GesturesDomain
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -27,7 +29,8 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideNetwork(client: HttpClient): Network = Network(client)
+    fun provideNetwork(@ApplicationContext appContext: Context, client: HttpClient): Network =
+        Network(appContext, client)
 
     @Provides
     @Singleton
