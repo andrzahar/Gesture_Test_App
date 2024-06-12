@@ -3,45 +3,52 @@ package com.andr.zahar2.gesturetestapp.service
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.graphics.Path
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import com.andr.zahar2.api.model.ClientEvent
 import com.andr.zahar2.api.model.GestureEvent
-import com.andr.zahar2.gesturetestapp.data.Network
+import com.andr.zahar2.gesturetestapp.domain.GesturesDomain
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class GesturesAccessibilityService : AccessibilityService() {
 
-    private val scope = MainScope()
+    private val scope: CoroutineScope = MainScope()
+
+    private var chromeOpenCheck = false
 
     @Inject
-    lateinit var network: Network
+    lateinit var domain: GesturesDomain
 
     override fun onServiceConnected() {
         super.onServiceConnected()
 
-        network.gestureListener().onEach {
-            makeGesture(it)
-        }.launchIn(scope)
-
-        Log.d("ttt", "onServiceConnected")
+        scope.launch {
+            domain.gesturesFlow.collect {
+                makeGesture(it)
+            }
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
         if (event?.source?.packageName == "com.android.chrome") {
-            Log.d("ttt", "chrome")
+            if (!chromeOpenCheck) {
+                chromeOpenCheck = true
+                onChromeIsOpen()
+            }
         } else {
-            Log.d("ttt", "not chrome")
+            chromeOpenCheck = false
         }
+    }
 
-        //network.sendEvent(ClientEvent.CHROME_IS_OPEN).launchIn(scope)
+    private fun onChromeIsOpen() {
+        scope.launch {
+            domain.onChromeIsOpen()
+        }
     }
 
     private fun makeGesture(gestureEvent: GestureEvent) {
@@ -50,12 +57,16 @@ class GesturesAccessibilityService : AccessibilityService() {
             object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription?) {
                     super.onCompleted(gestureDescription)
-                    Log.d("ttt", "onCompleted")
+                    scope.launch {
+                        domain.onGestureCompleted()
+                    }
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription?) {
                     super.onCancelled(gestureDescription)
-                    Log.d("ttt", "onCancelled")
+                    scope.launch {
+                        domain.onGestureCancelled()
+                    }
                 }
             },
             null
@@ -77,7 +88,11 @@ class GesturesAccessibilityService : AccessibilityService() {
         return swipeBuilder.build()
     }
 
-    override fun onInterrupt() {
+    private fun cancelScope() {
         scope.cancel()
+    }
+
+    override fun onInterrupt() {
+        cancelScope()
     }
 }
