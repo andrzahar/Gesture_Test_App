@@ -1,11 +1,13 @@
 package com.andr.zahar2.gesture_server.server
 
 import android.content.Context
+import com.andr.zahar2.gesture_server.preferences.Preferences.portFlow
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ServerManager(
@@ -18,7 +20,8 @@ class ServerManager(
     fun startServer() {
         CoroutineScope(Dispatchers.IO).launch {
             stopServer()
-            server = embeddedServer(Netty, port = 1106) {
+            val port = context.portFlow.first() ?: 80
+            server = embeddedServer(Netty, port = port) {
                 configureWebSockets(clientsConnectionsManager)
             }
             server?.start()
