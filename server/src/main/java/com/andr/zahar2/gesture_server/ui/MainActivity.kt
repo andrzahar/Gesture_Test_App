@@ -10,7 +10,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.andr.zahar2.gesture_server.ui.ui.theme.GestureTestAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,8 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             GestureTestAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Text(
-                        text = "test",
+                    ContentView(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
