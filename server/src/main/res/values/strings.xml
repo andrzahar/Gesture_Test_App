@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">Gesture_server</string>
+    <string name="app_name">Gesture Server</string>
+    <string name="start_button">Начать</string>
+    <string name="stop_button">Выключить</string>
+    <string name="config_button">Config</string>
+    <string name="logs_button">Логи</string>
+    <string name="save_button">Сохранить</string>
+    <string name="port_field">Порт</string>
 </resources>
