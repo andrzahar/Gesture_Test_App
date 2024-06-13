@@ -1,6 +1,7 @@
 package com.andr.zahar2.gesturetestapp.data
 
 import android.content.Context
+import android.util.Log
 import com.andr.zahar2.api.model.ClientEvent
 import com.andr.zahar2.api.model.Constants
 import com.andr.zahar2.api.model.GestureEvent
@@ -28,7 +29,11 @@ class Network(private val context: Context, private val client: HttpClient) {
 
     private var webSocketJob: Job? = null
 
+    private var started = false
+
     fun start(gesturesFlow: MutableSharedFlow<GestureEvent>, eventOnStart: ClientEvent) {
+        if (started) return
+        started = true
         webSocketJob = CoroutineScope(Dispatchers.IO).launch {
             supervisorScope {
                 while (isActive) {
@@ -50,6 +55,7 @@ class Network(private val context: Context, private val client: HttpClient) {
         val host = context.ipFlow.first()
         val port = context.portFlow.first()
         client.webSocket(host = host, port = port, path = Constants.PATH) {
+            Log.d("ttt", "new webSocket")
             socketSession = this
             sendEvent(eventOnStart)
             try {
@@ -77,11 +83,19 @@ class Network(private val context: Context, private val client: HttpClient) {
         }
     }
 
-    fun stop() {
-        socketSession?.cancel()
-        socketSession = null
+    fun stop(eventOnStop: ClientEvent? = null) {
+        CoroutineScope(Dispatchers.IO).launch {
+            eventOnStop?.let {
+                socketSession?.sendSerialized(eventOnStop)
+            }
 
-        webSocketJob?.cancel()
-        webSocketJob = null
+            socketSession?.cancel()
+            socketSession = null
+
+            webSocketJob?.cancel()
+            webSocketJob = null
+
+            started = false
+        }
     }
 }

@@ -36,7 +36,6 @@ class GesturesDomain(private val network: Network) {
 
     fun onPause() {
         _isActiveFlow.value = false
-        network.sendEvent(ClientEvent.PAUSE)
-        network.stop()
+        network.stop(ClientEvent.PAUSE)
     }
 }
