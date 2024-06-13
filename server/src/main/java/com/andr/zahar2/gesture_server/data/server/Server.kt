@@ -1,4 +1,4 @@
-package com.andr.zahar2.gesture_server.server
+package com.andr.zahar2.gesture_server.data.server
 
 import com.andr.zahar2.api.model.ClientEvent
 import com.andr.zahar2.api.model.Constants

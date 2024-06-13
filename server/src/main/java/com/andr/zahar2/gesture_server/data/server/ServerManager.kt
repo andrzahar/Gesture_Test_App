@@ -1,4 +1,4 @@
-package com.andr.zahar2.gesture_server.server
+package com.andr.zahar2.gesture_server.data.server
 
 import android.content.Context
 import com.andr.zahar2.gesture_server.preferences.Preferences.portFlow

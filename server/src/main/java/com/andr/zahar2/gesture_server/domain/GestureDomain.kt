@@ -1,9 +1,8 @@
 package com.andr.zahar2.gesture_server.domain
 
 import com.andr.zahar2.api.model.GestureEvent
-import com.andr.zahar2.api.model.Point
-import com.andr.zahar2.gesture_server.server.ClientsConnectionsManager
-import com.andr.zahar2.gesture_server.server.ServerManager
+import com.andr.zahar2.gesture_server.data.server.ClientsConnectionsManager
+import com.andr.zahar2.gesture_server.data.server.ServerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,9 +19,7 @@ class GestureDomain(
     init {
         repositoryScope.launch {
             clientsConnectionsManager.clientEventFlow.collect {
-                clientsConnectionsManager.broadcast(
-                    GestureEvent(Point(500f, 1000f), Point(500f, 1500f), 3000L)
-                )
+
             }
         }
     }
