@@ -1,7 +1,10 @@
 package com.andr.zahar2.gesture_server.di
 
 import android.content.Context
+import androidx.room.Room
 import com.andr.zahar2.api.model.GestureEvent
+import com.andr.zahar2.gesture_server.data.db.LogDao
+import com.andr.zahar2.gesture_server.data.db.LogDatabase
 import com.andr.zahar2.gesture_server.domain.GestureDomain
 import com.andr.zahar2.gesture_server.data.server.ClientsConnectionsManager
 import com.andr.zahar2.gesture_server.data.server.ServerManager
@@ -29,8 +32,21 @@ object ApplicationModule {
 
     @Provides
     @Singleton
+    fun provideLogDatabase(@ApplicationContext appContext: Context): LogDatabase =
+        Room.databaseBuilder(
+            appContext,
+            LogDatabase::class.java,
+            "log"
+        ).build()
+
+    @Provides
+    fun provideLogDao(database: LogDatabase): LogDao = database.logDao()
+
+    @Provides
+    @Singleton
     fun provideGestureDomain(
         serverManager: ServerManager,
-        clientsConnectionsManager: ClientsConnectionsManager
-    ): GestureDomain = GestureDomain(serverManager, clientsConnectionsManager)
+        clientsConnectionsManager: ClientsConnectionsManager,
+        logDao: LogDao
+    ): GestureDomain = GestureDomain(serverManager, clientsConnectionsManager, logDao)
 }
