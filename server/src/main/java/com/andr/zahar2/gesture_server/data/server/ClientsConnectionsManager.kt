@@ -6,6 +6,7 @@ import com.andr.zahar2.gesture_server.data.model.LogEvent
 import io.ktor.server.plugins.origin
 import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.sendSerialized
+import io.ktor.websocket.close
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -45,5 +46,12 @@ class ClientsConnectionsManager {
 
     fun removingConnection(session: DefaultWebSocketServerSession) {
         connections.remove(session)
+    }
+
+    suspend fun closeAllConnections() {
+        connections.forEach {
+            it.close()
+        }
+        connections.clear()
     }
 }

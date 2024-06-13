@@ -24,13 +24,14 @@ class ServerManager(
             server = embeddedServer(Netty, port = port) {
                 configureWebSockets(clientsConnectionsManager)
             }
-            server?.start()
+            server?.start(wait = true)
         }
     }
 
     fun stopServer() {
         CoroutineScope(Dispatchers.IO).launch {
-            server?.stop()
+            clientsConnectionsManager.closeAllConnections()
+            server?.stop(1000, 2000)
             server = null
         }
     }
