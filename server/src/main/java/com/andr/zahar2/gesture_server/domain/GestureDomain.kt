@@ -21,7 +21,7 @@ class GestureDomain(
     init {
         repositoryScope.launch {
             clientsConnectionsManager.clientEventFlow.collect {
-
+                logDao.insertAll(it)
             }
         }
     }
