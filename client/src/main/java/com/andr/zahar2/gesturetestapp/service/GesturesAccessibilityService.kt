@@ -78,7 +78,7 @@ class GesturesAccessibilityService : AccessibilityService() {
     private fun buildSwipe(gestureEvent: GestureEvent): GestureDescription {
         val swipePath = Path()
         swipePath.moveTo(gestureEvent.startPoint.x, gestureEvent.startPoint.y)
-        swipePath.lineTo(gestureEvent.endPoint.x, gestureEvent.endPoint.x)
+        swipePath.lineTo(gestureEvent.endPoint.x, gestureEvent.endPoint.y)
         val swipeBuilder = GestureDescription.Builder()
         swipeBuilder.addStroke(
             GestureDescription.StrokeDescription(
