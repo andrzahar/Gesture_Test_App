@@ -34,6 +34,8 @@ class GestureDomain(
         clientsConnectionsManager.broadcast(gestureEvent)
     }
 
+    fun getLogEvents() = logDao.getAll()
+
     fun stop() {
         serverManager.stopServer()
     }

@@ -3,16 +3,32 @@ package com.andr.zahar2.gesture_server.ui
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.andr.zahar2.api.model.GestureEvent
+import com.andr.zahar2.gesture_server.data.model.LogEvent
 import com.andr.zahar2.gesture_server.domain.GestureDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(private val domain: GestureDomain): ViewModel() {
 
+    private val _logEvents = MutableStateFlow(emptyList<LogEvent>())
+    val logEvents = _logEvents.asStateFlow()
+
     private var startPointer: PointerInputChange? = null
     private var endPointer: PointerInputChange? = null
+
+    init {
+        viewModelScope.launch {
+            domain.getLogEvents().collect {
+                _logEvents.emit(it)
+            }
+        }
+    }
 
     fun onStartClick() {
         domain.start()
