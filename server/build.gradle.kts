@@ -5,6 +5,7 @@ plugins {
     id(libs.plugins.kapt.get().pluginId)
     alias(libs.plugins.hilt)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -77,6 +78,9 @@ dependencies {
     implementation(libs.viewmodel)
 
     implementation(libs.datastore)
+
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
